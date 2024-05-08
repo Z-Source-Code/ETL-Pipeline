@@ -83,39 +83,65 @@
         "documentation": {}
     },
     {
-        "label": "extract_data_from_supabase",
+        "label": "create_sb_client",
+        "importPath": "src.database",
+        "description": "src.database",
+        "isExtraImport": true,
+        "detail": "src.database",
+        "documentation": {}
+    },
+    {
+        "label": "create_sb_client",
         "kind": 2,
         "importPath": "src.database",
         "description": "src.database",
-        "peekOfCode": "def extract_data_from_supabase(table_name: str, column_name: str) -> list[str]:\n  try:\n      url: str = os.environ.get(\"SUPABASE_PROJECT_URL\")\n      key: str = os.environ.get(\"SUPABASE_API_KEY\")\n      supabase: Client = create_client(url, key)\n      start = 0\n      limit = 1000\n      all_job_description = []\n      while True:\n          response = supabase.table(table_name).select('id', column_name).range(start, start + limit).execute()",
+        "peekOfCode": "def create_sb_client():\n  url: str = os.environ.get(\"SUPABASE_PROJECT_URL\")\n  key: str = os.environ.get(\"SUPABASE_API_KEY\")\n  supabase: Client = create_client(url, key)\n  return supabase",
         "detail": "src.database",
+        "documentation": {}
+    },
+    {
+        "label": "extract_data_from_supabase",
+        "kind": 2,
+        "importPath": "src.etl",
+        "description": "src.etl",
+        "peekOfCode": "def extract_data_from_supabase(table_name: str, column_name: str) -> list[str]:\n  try:\n      supabase = create_sb_client()\n      start = 0\n      limit = 1000\n      all_job_description = []\n      while True:\n          response = supabase.table(table_name).select('id', column_name).range(start, start + limit).execute()\n          if response:\n            data = response.data",
+        "detail": "src.etl",
         "documentation": {}
     },
     {
         "label": "nltk_to_wordnet_pos",
         "kind": 2,
-        "importPath": "src.database",
-        "description": "src.database",
+        "importPath": "src.etl",
+        "description": "src.etl",
         "peekOfCode": "def nltk_to_wordnet_pos(nltk_tag):\n    \"\"\"\n    Descr: Convert NLTK POS tag to WordNet POS tag.\n    Input: nltk_tag\n    Output: wordnet_pos\n    \"\"\"\n    if nltk_tag.startswith('J'):\n        return wordnet.ADJ\n    elif nltk_tag.startswith('V'):\n        return wordnet.VERB",
-        "detail": "src.database",
+        "detail": "src.etl",
         "documentation": {}
     },
     {
         "label": "clean_and_lemmatize",
         "kind": 2,
-        "importPath": "src.database",
-        "description": "src.database",
+        "importPath": "src.etl",
+        "description": "src.etl",
         "peekOfCode": "def clean_and_lemmatize(data):\n  \"\"\"\n  Descr: Clean text data by removing punctuation, stopwords, and converting to lowercase.\n          Additionally, perform lemmatization on the cleaned text.\n  Input: data (text)\n  Output: cleaned and lemmatized text\n  \"\"\"\n  stop_words = set(stopwords.words('english'))\n  lemmatizer = WordNetLemmatizer() \n  clean_and_lemmatized_data  = []",
-        "detail": "src.database",
+        "detail": "src.etl",
+        "documentation": {}
+    },
+    {
+        "label": "load_cleaned_data_to_supabase",
+        "kind": 2,
+        "importPath": "src.etl",
+        "description": "src.etl",
+        "peekOfCode": "def load_cleaned_data_to_supabase(table_name: str, column_name: str, cleaned_data: list[dict]):\n  try:\n    supabase = create_sb_client()\n    for item in cleaned_data:\n      identifier = item['id']\n      cleaned_job_description = item[column_name]\n      data, count = supabase.table(table_name).update({column_name: cleaned_job_description}).eq(\"id\", identifier).execute()\n    print(\"Cleaned job descriptions loaded to Supabase successfully.\")\n  except Exception as e:\n      print(\"An error occurred:\", e)",
+        "detail": "src.etl",
         "documentation": {}
     },
     {
         "label": "main",
         "kind": 2,
-        "importPath": "src.database",
-        "description": "src.database",
-        "peekOfCode": "def main():\n  nltk.download('punkt')\n  nltk.download('stopwords')\n  nltk.download('wordnet')\n  data = extract_data_from_supabase('Job Postings', 'job_description')\n  print('Total job descriptions:', len(data))\n  clean_and_lemmatized_data = clean_and_lemmatize(data)\n  print('Total cleaned job descriptions:', len(clean_and_lemmatized_data)) \nif __name__ == '__main__':\n  main()",
-        "detail": "src.database",
+        "importPath": "src.etl",
+        "description": "src.etl",
+        "peekOfCode": "def main():\n  nltk.download('punkt')\n  nltk.download('stopwords')\n  nltk.download('wordnet')\n  table = 'Job Postings'\n  column = 'job_description'\n  cleaned_column = 'cleaned_job_description'\n  data = extract_data_from_supabase(table, column)\n  clean_and_lemmatized_data = clean_and_lemmatize(data)\n  print('Total cleaned job descriptions:', len(clean_and_lemmatized_data)) ",
+        "detail": "src.etl",
         "documentation": {}
     }
 ]
