@@ -4,65 +4,112 @@ from supabase import create_client, Client
 import nltk
 from nltk.corpus import stopwords 
 from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+from nltk.corpus import wordnet
+from nltk import pos_tag
 
-
-def extract_data_from_supabase(table_name: str, column_name: str, page_size: int, page_number: int) -> list[str]:
+def extract_data_from_supabase(table_name: str, column_name: str) -> list[str]:
   try:
       url: str = os.environ.get("SUPABASE_PROJECT_URL")
       key: str = os.environ.get("SUPABASE_API_KEY")
-
       supabase: Client = create_client(url, key)
-      from_index = (page_number - 1) * page_size 
-      to_index = from_index + page_size - 1
-      print(from_index, to_index)
-      response = supabase.table(table_name).select(column_name).range(1000, 1400).execute()
       
-      if response:
-        data = response.data
-        print(len(data))
-        if data:
-          job_descriptions = [job for job in data]
-          
-          return job_descriptions, len(job_descriptions)
-        else:
-          print('No job title found.')
-      else:
-        print('Error:', response.content)
+      start = 0
+      limit = 1000
+      all_job_description = []
+      
+      while True:
+          response = supabase.table(table_name).select('id', column_name).range(start, start + limit).execute()
+      
+          if response:
+            data = response.data
+            if data:
+              # job_titles = [job[column_name] for job in data]
+              # all_job_titles.extend(job_titles)
+              for row in data:
+                identifier = row['id']
+                job_description = row['job_description']
+                all_job_description.append({"id": identifier, "job_description": job_description})
+            else:
+                print("No job descriptions found.")
+                
+            start += limit
+            if len(data) < limit:
+              break 
+          else:
+              print("Error: Empty response from Supabase.")
+              break 
+        
+      return all_job_description
       
   except Exception as e:
       print("An error occurred:", e)
       
-def clean_data(data):
+      
+def nltk_to_wordnet_pos(nltk_tag):
+    """
+    Descr: Convert NLTK POS tag to WordNet POS tag.
+    Input: nltk_tag
+    Output: wordnet_pos
+    """
+    if nltk_tag.startswith('J'):
+        return wordnet.ADJ
+    elif nltk_tag.startswith('V'):
+        return wordnet.VERB
+    elif nltk_tag.startswith('N'):
+        return wordnet.NOUN
+    elif nltk_tag.startswith('R'):
+        return wordnet.ADV
+    else:
+        return None
+
+      
+def clean_and_lemmatize(data):
   """
   Descr: Clean text data by removing punctuation, stopwords, and converting to lowercase.
-  Input: text
-  Output: cleaned text
+          Additionally, perform lemmatization on the cleaned text.
+  Input: data (text)
+  Output: cleaned and lemmatized text
   """
-  description = re.sub(r"\{\{.*?\}\}", "", data)
-  description = word_tokenize(description)
-  description = [w.lower() for w in description]
-  description = [word for word in description if word.isalpha()]
   stop_words = set(stopwords.words('english'))
-  description = [word for word in description if word not in stop_words]
-  return ' '.join(description)
-
-
-
+  lemmatizer = WordNetLemmatizer() 
   
-      
-      
+  clean_and_lemmatized_data  = []
+  
+  for item in data:
+    identifier = item['id']
+    job_description = item['job_description']
+    
+    
+    clean_data = re.sub(r"\{\{.*?\}\}", "", job_description)
+    clean_data = word_tokenize(clean_data)
+    clean_data = [w.lower() for w in clean_data]
+    clean_data = [word for word in clean_data if word.isalpha()]
+    clean_data = [word for word in clean_data if word not in stop_words]
+  
+    tokens = word_tokenize(' '.join(clean_data))
+    pos_tags = pos_tag(tokens)
+    lemmatized_words = [] 
+    
+    for word, tag in pos_tags:
+      wn_tag = nltk_to_wordnet_pos(tag)
+      if wn_tag is None: 
+        lemmatized_word = lemmatizer.lemmatize(word)
+      else:
+        lemmatized_word = lemmatizer.lemmatize(word, pos=wn_tag)
+      lemmatized_words.append(lemmatized_word)    
+    clean_and_lemmatized_data.append({"id": identifier, "cleaned_job_description": ' '.join(lemmatized_words)})  
+  return clean_and_lemmatized_data
+
 def main():
   nltk.download('punkt')
   nltk.download('stopwords')
   nltk.download('wordnet')
   
-  page_size = 100
-  page_number = 26
-  
-  data, length = extract_data_from_supabase('Job Postings', 'job_description', page_size, page_number)
-  # print(data, length)
-  # cleaned_data = clean_data(data)
-  # print(cleaned_data) 
+  data = extract_data_from_supabase('Job Postings', 'job_description')
+  print('Total job descriptions:', len(data))
+  clean_and_lemmatized_data = clean_and_lemmatize(data)
+  print('Total cleaned job descriptions:', len(clean_and_lemmatized_data)) 
       
 if __name__ == '__main__':
   main()

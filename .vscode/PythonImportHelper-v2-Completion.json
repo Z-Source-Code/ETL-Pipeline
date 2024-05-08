@@ -1,0 +1,121 @@
+[
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "re",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "re",
+        "description": "re",
+        "detail": "re",
+        "documentation": {}
+    },
+    {
+        "label": "create_client",
+        "importPath": "supabase",
+        "description": "supabase",
+        "isExtraImport": true,
+        "detail": "supabase",
+        "documentation": {}
+    },
+    {
+        "label": "Client",
+        "importPath": "supabase",
+        "description": "supabase",
+        "isExtraImport": true,
+        "detail": "supabase",
+        "documentation": {}
+    },
+    {
+        "label": "nltk",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "nltk",
+        "description": "nltk",
+        "detail": "nltk",
+        "documentation": {}
+    },
+    {
+        "label": "pos_tag",
+        "importPath": "nltk",
+        "description": "nltk",
+        "isExtraImport": true,
+        "detail": "nltk",
+        "documentation": {}
+    },
+    {
+        "label": "stopwords",
+        "importPath": "nltk.corpus",
+        "description": "nltk.corpus",
+        "isExtraImport": true,
+        "detail": "nltk.corpus",
+        "documentation": {}
+    },
+    {
+        "label": "wordnet",
+        "importPath": "nltk.corpus",
+        "description": "nltk.corpus",
+        "isExtraImport": true,
+        "detail": "nltk.corpus",
+        "documentation": {}
+    },
+    {
+        "label": "word_tokenize",
+        "importPath": "nltk.tokenize",
+        "description": "nltk.tokenize",
+        "isExtraImport": true,
+        "detail": "nltk.tokenize",
+        "documentation": {}
+    },
+    {
+        "label": "WordNetLemmatizer",
+        "importPath": "nltk.stem",
+        "description": "nltk.stem",
+        "isExtraImport": true,
+        "detail": "nltk.stem",
+        "documentation": {}
+    },
+    {
+        "label": "extract_data_from_supabase",
+        "kind": 2,
+        "importPath": "src.database",
+        "description": "src.database",
+        "peekOfCode": "def extract_data_from_supabase(table_name: str, column_name: str) -> list[str]:\n  try:\n      url: str = os.environ.get(\"SUPABASE_PROJECT_URL\")\n      key: str = os.environ.get(\"SUPABASE_API_KEY\")\n      supabase: Client = create_client(url, key)\n      start = 0\n      limit = 1000\n      all_job_description = []\n      while True:\n          response = supabase.table(table_name).select('id', column_name).range(start, start + limit).execute()",
+        "detail": "src.database",
+        "documentation": {}
+    },
+    {
+        "label": "nltk_to_wordnet_pos",
+        "kind": 2,
+        "importPath": "src.database",
+        "description": "src.database",
+        "peekOfCode": "def nltk_to_wordnet_pos(nltk_tag):\n    \"\"\"\n    Descr: Convert NLTK POS tag to WordNet POS tag.\n    Input: nltk_tag\n    Output: wordnet_pos\n    \"\"\"\n    if nltk_tag.startswith('J'):\n        return wordnet.ADJ\n    elif nltk_tag.startswith('V'):\n        return wordnet.VERB",
+        "detail": "src.database",
+        "documentation": {}
+    },
+    {
+        "label": "clean_and_lemmatize",
+        "kind": 2,
+        "importPath": "src.database",
+        "description": "src.database",
+        "peekOfCode": "def clean_and_lemmatize(data):\n  \"\"\"\n  Descr: Clean text data by removing punctuation, stopwords, and converting to lowercase.\n          Additionally, perform lemmatization on the cleaned text.\n  Input: data (text)\n  Output: cleaned and lemmatized text\n  \"\"\"\n  stop_words = set(stopwords.words('english'))\n  lemmatizer = WordNetLemmatizer() \n  clean_and_lemmatized_data  = []",
+        "detail": "src.database",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "src.database",
+        "description": "src.database",
+        "peekOfCode": "def main():\n  nltk.download('punkt')\n  nltk.download('stopwords')\n  nltk.download('wordnet')\n  data = extract_data_from_supabase('Job Postings', 'job_description')\n  print('Total job descriptions:', len(data))\n  clean_and_lemmatized_data = clean_and_lemmatize(data)\n  print('Total cleaned job descriptions:', len(clean_and_lemmatized_data)) \nif __name__ == '__main__':\n  main()",
+        "detail": "src.database",
+        "documentation": {}
+    }
+]
