@@ -9,15 +9,6 @@
         "documentation": {}
     },
     {
-        "label": "re",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "re",
-        "description": "re",
-        "detail": "re",
-        "documentation": {}
-    },
-    {
         "label": "create_client",
         "importPath": "supabase",
         "description": "supabase",
@@ -31,6 +22,15 @@
         "description": "supabase",
         "isExtraImport": true,
         "detail": "supabase",
+        "documentation": {}
+    },
+    {
+        "label": "re",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "re",
+        "description": "re",
+        "detail": "re",
         "documentation": {}
     },
     {
@@ -84,10 +84,10 @@
     },
     {
         "label": "create_sb_client",
-        "importPath": "src.database",
-        "description": "src.database",
+        "importPath": "database",
+        "description": "database",
         "isExtraImport": true,
-        "detail": "src.database",
+        "detail": "database",
         "documentation": {}
     },
     {
@@ -104,7 +104,7 @@
         "kind": 2,
         "importPath": "src.etl",
         "description": "src.etl",
-        "peekOfCode": "def extract_data_from_supabase(table_name: str, column_name: str) -> list[str]:\n  try:\n      supabase = create_sb_client()\n      start = 0\n      limit = 1000\n      all_job_description = []\n      while True:\n          response = supabase.table(table_name).select('id', column_name).range(start, start + limit).execute()\n          if response:\n            data = response.data",
+        "peekOfCode": "def extract_data_from_supabase(table_name: str, column_name: str) -> list[str]:\n  try:\n      supabase = create_sb_client()\n      start = 0\n      limit = 1000\n      all_items = []\n      print('table_name', table_name)\n      print('column_name', column_name)\n      while True:\n          response = supabase.table(table_name).select('id', column_name).range(start, start + limit).execute()",
         "detail": "src.etl",
         "documentation": {}
     },
@@ -122,7 +122,7 @@
         "kind": 2,
         "importPath": "src.etl",
         "description": "src.etl",
-        "peekOfCode": "def clean_and_lemmatize(data):\n  \"\"\"\n  Descr: Clean text data by removing punctuation, stopwords, and converting to lowercase.\n          Additionally, perform lemmatization on the cleaned text.\n  Input: data (text)\n  Output: cleaned and lemmatized text\n  \"\"\"\n  stop_words = set(stopwords.words('english'))\n  lemmatizer = WordNetLemmatizer() \n  clean_and_lemmatized_data  = []",
+        "peekOfCode": "def clean_and_lemmatize(data, column_name, cleaned_column):\n  \"\"\"\n  Descr: Clean text data by removing punctuation, stopwords, and converting to lowercase.\n          Additionally, perform lemmatization on the cleaned text.\n  Input: data (text)\n  Output: cleaned and lemmatized text\n  \"\"\"\n  stop_words = set(stopwords.words('english'))\n  lemmatizer = WordNetLemmatizer() \n  clean_and_lemmatized_data  = []",
         "detail": "src.etl",
         "documentation": {}
     },
@@ -131,7 +131,7 @@
         "kind": 2,
         "importPath": "src.etl",
         "description": "src.etl",
-        "peekOfCode": "def load_cleaned_data_to_supabase(table_name: str, column_name: str, cleaned_data: list[dict]):\n  try:\n    supabase = create_sb_client()\n    for item in cleaned_data:\n      identifier = item['id']\n      cleaned_job_description = item[column_name]\n      data, count = supabase.table(table_name).update({column_name: cleaned_job_description}).eq(\"id\", identifier).execute()\n    print(\"Cleaned job descriptions loaded to Supabase successfully.\")\n  except Exception as e:\n      print(\"An error occurred:\", e)",
+        "peekOfCode": "def load_cleaned_data_to_supabase(table_name: str, column_name: str, cleaned_data: list[dict]):\n  try:\n    supabase = create_sb_client()\n    for item in cleaned_data:\n      identifier = item['id']\n      cleaned_col_data = item[column_name]\n      data, count = supabase.table(table_name).update({column_name: cleaned_col_data}).eq(\"id\", identifier).execute()\n    print(\"Cleaned job descriptions loaded to Supabase successfully.\")\n  except Exception as e:\n      print(\"An error occurred:\", e)",
         "detail": "src.etl",
         "documentation": {}
     },
@@ -140,7 +140,7 @@
         "kind": 2,
         "importPath": "src.etl",
         "description": "src.etl",
-        "peekOfCode": "def main():\n  nltk.download('punkt')\n  nltk.download('stopwords')\n  nltk.download('wordnet')\n  table = 'Job Postings'\n  column = 'job_description'\n  cleaned_column = 'cleaned_job_description'\n  data = extract_data_from_supabase(table, column)\n  clean_and_lemmatized_data = clean_and_lemmatize(data)\n  print('Total cleaned job descriptions:', len(clean_and_lemmatized_data)) ",
+        "peekOfCode": "def main():\n  nltk.download('punkt')\n  nltk.download('stopwords')\n  nltk.download('wordnet')\n  table = 'User'\n  column = 'resume'\n  cleaned_column = 'cleaned_resume'\n  data = extract_data_from_supabase(table, column)\n  print('data', data)\n  clean_and_lemmatized_data = clean_and_lemmatize(data, column, cleaned_column)",
         "detail": "src.etl",
         "documentation": {}
     }
