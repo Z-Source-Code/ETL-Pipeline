@@ -13,8 +13,6 @@ def extract_data_from_supabase(table_name: str, column_name: str) -> list[str]:
       start = 0
       limit = 1000
       all_items = []
-      print('table_name', table_name)
-      print('column_name', column_name)
       
       while True:
           response = supabase.table(table_name).select('id', column_name).range(start, start + limit).execute()
