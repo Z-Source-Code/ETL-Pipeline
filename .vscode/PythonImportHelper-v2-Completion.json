@@ -104,7 +104,7 @@
         "kind": 2,
         "importPath": "src.etl",
         "description": "src.etl",
-        "peekOfCode": "def extract_data_from_supabase(table_name: str, column_name: str) -> list[str]:\n  try:\n      supabase = create_sb_client()\n      start = 0\n      limit = 1000\n      all_items = []\n      print('table_name', table_name)\n      print('column_name', column_name)\n      while True:\n          response = supabase.table(table_name).select('id', column_name).range(start, start + limit).execute()",
+        "peekOfCode": "def extract_data_from_supabase(table_name: str, column_name: str) -> list[str]:\n  try:\n      supabase = create_sb_client()\n      start = 0\n      limit = 1000\n      all_items = []\n      while True:\n          response = supabase.table(table_name).select('id', column_name).range(start, start + limit).execute()\n          print(response)\n          if response:",
         "detail": "src.etl",
         "documentation": {}
     },
